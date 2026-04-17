@@ -1,9 +1,17 @@
 import os
 import subprocess
 import sys
+import re
+
+def natural_sort_key(s):
+    return [int(text) if text.isdigit() else text.lower()
+            for text in re.split(r'(\d+)', s)]
+
 
 def get_mp3_files():
-    return sorted([f for f in os.listdir() if f.endswith(".mp3")])
+    files = [f for f in os.listdir() if f.endswith(".mp3")]
+    return sorted(files, key=natural_sort_key)
+
 
 def get_duration(file):
     result = subprocess.run(
@@ -17,10 +25,11 @@ def get_duration(file):
     )
     return float(result.stdout.strip())
 
+
 def clean_title(filename):
     name = filename.split("_", 1)[-1].replace(".mp3", "")
     name = name.replace("_", " ")
-    name = name.replace("CHAPTER", "Chapter")
+    name = re.sub(r"\bCHAPTER\b", "Chapter", name)
 
     numbers = {
         "One": "1", "Two": "2", "Three": "3",
@@ -34,13 +43,14 @@ def clean_title(filename):
 
     return name.strip()
 
+
 def generate_chapters(files):
     start = 0
     chapters = []
 
     for f in files:
         duration = get_duration(f)
-        end = start + duration
+        end = round(start + duration, 3)
         chapters.append((start, end, clean_title(f)))
         start = end
 
@@ -67,7 +77,7 @@ def main():
         chapters = generate_chapters(files)
         write_chapters_file(chapters)
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"❌ Error while generating chapters: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":

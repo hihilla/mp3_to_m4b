@@ -1,7 +1,7 @@
 AUDIO_DIR=.
 OUTPUT?=book.m4b
 
-MP3_FILES := $(shell ls $(AUDIO_DIR)/*.mp3 2>/dev/null | sort)
+MP3_FILES := $(shell find $(AUDIO_DIR) -name "*.mp3" | sort)
 
 all: check $(OUTPUT)
 
@@ -23,6 +23,10 @@ chapters.txt:
 	@python3 generate_chapters.py || (echo "❌ Chapter generation failed" && exit 1)
 
 $(OUTPUT): files.txt chapters.txt
+    @if [ -f $(OUTPUT) ]; then \
+    	echo "❌ Output file already exists: $(OUTPUT)"; \
+    	exit 1; \
+    fi
 	@echo "🎧 Creating audiobook..."
 
 	@ffmpeg -y -loglevel error -f concat -safe 0 -i files.txt \

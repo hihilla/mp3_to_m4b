@@ -20,6 +20,10 @@ def test_main_success(tmp_path, monkeypatch):
 
     assert os.path.exists("chapters.txt")
 
+    content = open("chapters.txt").read()
+    assert "[CHAPTER]" in content
+    assert "title=" in content
+
 def test_main_no_files(tmp_path, monkeypatch):
     os.chdir(tmp_path)
 
