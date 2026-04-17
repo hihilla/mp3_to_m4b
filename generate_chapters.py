@@ -63,11 +63,18 @@ def generate_chapters(files):
     start = 0
     chapters = []
 
-    for f in files:
+    total = len(files)
+
+    for i, f in enumerate(files, 1):
         duration = get_duration(f)
         end = round(start + duration, 3)
         chapters.append((start, end, clean_title(f)))
         start = end
+
+        # Progress update (overwrite same line)
+        print(f"\r🧠 Processing chapters: {i}/{total}", end="", flush=True)
+
+    print()  # newline after loop
 
     return chapters
 

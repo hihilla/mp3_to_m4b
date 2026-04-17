@@ -1,6 +1,8 @@
 AUDIO_DIR=.
 OUTPUT?=book.m4b
 
+.PHONY: all check files.txt chapters.txt clean
+
 MP3_FILES := $(shell find $(AUDIO_DIR) -name "*.mp3" | sort)
 
 all: check $(OUTPUT)
@@ -11,14 +13,14 @@ check:
 		exit 1; \
 	fi
 
-files.txt:
+files.txt: FORCE
 	@echo "📄 Generating file list..."
 	@rm -f files.txt
 	@for f in $(MP3_FILES); do \
 		printf "file '%s'\n" "$$f" >> files.txt; \
 	done
 
-chapters.txt:
+chapters.txt: FORCE
 	@echo "🧠 Generating chapters..."
 	@python3 generate_chapters.py || (echo "❌ Chapter generation failed" && exit 1)
 
@@ -27,13 +29,14 @@ $(OUTPUT): files.txt chapters.txt
 		echo "❌ Output file already exists: $(OUTPUT)"; \
 		exit 1; \
 	fi
+
 	@echo "🎧 Creating audiobook..."
 
-	@ffmpeg -y -loglevel error -f concat -safe 0 -i files.txt \
-	-i chapters.txt \
-	-map_metadata 1 \
-	-c:a aac -b:a 64k \
-	temp.m4b || (echo "❌ ffmpeg merge failed" && exit 1)
+	@bash -c 'set -o pipefail; ffmpeg -y -progress pipe:1 -nostats -f concat -safe 0 -i files.txt \
+    -i chapters.txt \
+    -map_metadata 1 \
+    -c:a aac -b:a 64k \
+    temp.m4b 2>&1 | python3 -u $(CURDIR)/progress.py'
 
 	@if [ -f cover.jpg ]; then \
 		echo "🖼 Adding cover..."; \
@@ -52,3 +55,5 @@ $(OUTPUT): files.txt chapters.txt
 
 clean:
 	rm -f files.txt chapters.txt temp.m4b $(OUTPUT)
+
+FORCE:
