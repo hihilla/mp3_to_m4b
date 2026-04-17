@@ -8,8 +8,8 @@ def natural_sort_key(s):
             for text in re.split(r'(\d+)', s)]
 
 
-def get_mp3_files():
-    files = [f for f in os.listdir() if f.endswith(".mp3")]
+def get_mp3_files(audio_dir="."):
+    files = [os.path.join(audio_dir, f) for f in os.listdir(audio_dir) if f.endswith(".mp3")]
     return sorted(files, key=natural_sort_key)
 
 
@@ -84,7 +84,8 @@ def write_chapters_file(chapters, output="chapters.txt"):
 
 
 def main():
-    files = get_mp3_files()
+    audio_dir = os.environ.get("AUDIO_DIR", ".")
+    files = get_mp3_files(audio_dir)
 
     if not files:
         print("❌ No MP3 files found")

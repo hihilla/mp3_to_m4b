@@ -23,13 +23,13 @@ chapters.txt:
 	@python3 generate_chapters.py || (echo "❌ Chapter generation failed" && exit 1)
 
 $(OUTPUT): files.txt chapters.txt
-    @if [ -f $(OUTPUT) ]; then \
-    	echo "❌ Output file already exists: $(OUTPUT)"; \
-    	exit 1; \
-    fi
+	@if [ -f $(OUTPUT) ]; then \
+		echo "❌ Output file already exists: $(OUTPUT)"; \
+		exit 1; \
+	fi
 	@echo "🎧 Creating audiobook..."
 
-	@ffmpeg -y -loglevel error -f concat -safe 0 -i files.txt \
+	@ffmpeg -y -progress pipe:1 -nostats -f concat -safe 0 -i files.txt \
 	-i chapters.txt \
 	-map_metadata 1 \
 	-c:a aac -b:a 64k \

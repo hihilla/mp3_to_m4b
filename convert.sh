@@ -15,10 +15,9 @@ if [ ! -d "$INPUT_DIR" ]; then
   exit 1
 fi
 
-cd "$INPUT_DIR"
 
 # Check for MP3 files
-MP3_COUNT=$(ls *.mp3 2>/dev/null | wc -l)
+MP3_COUNT=$(find "$INPUT_DIR" -name "*.mp3" | wc -l)
 
 if [ "$MP3_COUNT" -eq 0 ]; then
   echo "❌ Error: No MP3 files found in $INPUT_DIR"
@@ -27,8 +26,12 @@ fi
 
 echo "🔢 Found $MP3_COUNT MP3 files"
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Run conversion
-if make OUTPUT="$OUTPUT"; then
+if make -C "$SCRIPT_DIR" \
+     AUDIO_DIR="$INPUT_DIR" \
+     OUTPUT="$OUTPUT"; then
   echo "✅ Conversion successful: $OUTPUT"
 else
   echo "❌ Conversion failed"
