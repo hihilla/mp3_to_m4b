@@ -29,7 +29,7 @@ $(OUTPUT): files.txt chapters.txt
 	fi
 	@echo "🎧 Creating audiobook..."
 
-	@ffmpeg -y -progress pipe:1 -nostats -f concat -safe 0 -i files.txt \
+	@ffmpeg -y -loglevel error -f concat -safe 0 -i files.txt \
 	-i chapters.txt \
 	-map_metadata 1 \
 	-c:a aac -b:a 64k \
