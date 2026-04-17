@@ -27,10 +27,25 @@ def get_duration(file):
 
 
 def clean_title(filename):
-    name = filename.split("_", 1)[-1].replace(".mp3", "")
-    name = name.replace("_", " ")
-    name = re.sub(r"\bCHAPTER\b", "Chapter", name)
+    import re
 
+    # Extract name after first underscore (if exists)
+    parts = filename.split("_", 1)
+    name = parts[1] if len(parts) > 1 else parts[0]
+
+    # Remove extension
+    name = name.replace(".mp3", "")
+
+    # Replace underscores with spaces
+    name = name.replace("_", " ")
+
+    # Normalize whitespace
+    name = re.sub(r"\s+", " ", name).strip()
+
+    # Normalize CHAPTER casing
+    name = re.sub(r"\bCHAPTER\b", "Chapter", name, flags=re.IGNORECASE)
+
+    # Convert written numbers to digits
     numbers = {
         "One": "1", "Two": "2", "Three": "3",
         "Four": "4", "Five": "5", "Six": "6",
@@ -39,9 +54,9 @@ def clean_title(filename):
     }
 
     for word, digit in numbers.items():
-        name = name.replace(f"Chapter {word}", f"Chapter {digit}")
+        name = re.sub(rf"\b{word}\b", digit, name, flags=re.IGNORECASE)
 
-    return name.strip()
+    return name
 
 
 def generate_chapters(files):
@@ -56,6 +71,7 @@ def generate_chapters(files):
 
     return chapters
 
+
 def write_chapters_file(chapters, output="chapters.txt"):
     with open(output, "w") as f:
         f.write(";FFMETADATA1\n")
@@ -65,6 +81,7 @@ def write_chapters_file(chapters, output="chapters.txt"):
             f.write(f"START={int(start*1000)}\n")
             f.write(f"END={int(end*1000)}\n")
             f.write(f"title={title}\n")
+
 
 def main():
     files = get_mp3_files()
@@ -79,6 +96,7 @@ def main():
     except Exception as e:
         print(f"❌ Error while generating chapters: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
