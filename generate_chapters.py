@@ -2,14 +2,20 @@ import os
 import subprocess
 import sys
 
-files = sorted([f for f in os.listdir() if f.endswith(".mp3")])
+def get_mp3_files():
+    return sorted([f for f in os.listdir() if f.endswith(".mp3")])
 
-if not files:
-    print("❌ No MP3 files found")
-    sys.exit(1)
-
-start = 0
-chapters = []
+def get_duration(file):
+    result = subprocess.run(
+        [
+            "ffprobe", "-v", "error",
+            "-show_entries", "format=duration",
+            "-of", "default=noprint_wrappers=1:nokey=1",
+            file
+        ],
+        capture_output=True, text=True, check=True
+    )
+    return float(result.stdout.strip())
 
 def clean_title(filename):
     name = filename.split("_", 1)[-1].replace(".mp3", "")
@@ -28,30 +34,20 @@ def clean_title(filename):
 
     return name.strip()
 
-for f in files:
-    try:
-        result = subprocess.run(
-            [
-                "ffprobe", "-v", "error",
-                "-show_entries", "format=duration",
-                "-of", "default=noprint_wrappers=1:nokey=1",
-                f
-            ],
-            capture_output=True, text=True, check=True
-        )
+def generate_chapters(files):
+    start = 0
+    chapters = []
 
-        duration = float(result.stdout.strip())
+    for f in files:
+        duration = get_duration(f)
+        end = start + duration
+        chapters.append((start, end, clean_title(f)))
+        start = end
 
-    except Exception as e:
-        print(f"❌ Failed to read duration for {f}: {e}")
-        sys.exit(1)
+    return chapters
 
-    end = start + duration
-    chapters.append((start, end, clean_title(f)))
-    start = end
-
-try:
-    with open("chapters.txt", "w") as f:
+def write_chapters_file(chapters, output="chapters.txt"):
+    with open(output, "w") as f:
         f.write(";FFMETADATA1\n")
         for start, end, title in chapters:
             f.write("[CHAPTER]\n")
@@ -59,6 +55,20 @@ try:
             f.write(f"START={int(start*1000)}\n")
             f.write(f"END={int(end*1000)}\n")
             f.write(f"title={title}\n")
-except Exception as e:
-    print(f"❌ Failed to write chapters.txt: {e}")
-    sys.exit(1)
+
+def main():
+    files = get_mp3_files()
+
+    if not files:
+        print("❌ No MP3 files found")
+        sys.exit(1)
+
+    try:
+        chapters = generate_chapters(files)
+        write_chapters_file(chapters)
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
