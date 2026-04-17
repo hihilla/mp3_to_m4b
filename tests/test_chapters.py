@@ -35,12 +35,12 @@ def test_generate_chapters(monkeypatch):
 def test_natural_sorting(monkeypatch):
     files = ["1.mp3", "10.mp3", "2.mp3"]
 
-    monkeypatch.setattr("os.listdir", lambda: files)
+    monkeypatch.setattr("os.listdir", lambda _: files)
 
     from generate_chapters import get_mp3_files
     result = get_mp3_files()
 
-    assert result == ["1.mp3", "2.mp3", "10.mp3"]
+    assert result == ["./1.mp3", "./2.mp3", "./10.mp3"]
 
 def test_clean_title_edge_cases():
     from generate_chapters import clean_title
