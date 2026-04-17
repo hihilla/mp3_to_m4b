@@ -52,3 +52,17 @@ Add a `cover.jpg` to embed cover art.
 
 * Chapters are based on file durations
 * Filenames are used to generate chapter titles
+
+## Tests
+
+From your repo root:
+
+```bash
+pytest
+```
+
+Or with coverage:
+
+```bash
+pytest --cov=generate_chapters --cov-report=term-missing
+```
