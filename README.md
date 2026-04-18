@@ -2,6 +2,8 @@
 
 Convert a folder of chapter-based MP3 files into a single `.m4b` audiobook with chapters.
 
+Made to unite the output from [.epub to Audiobook](https://github.com/p0n1/epub_to_audiobook) tool.
+
 ## Features
 
 * Merges multiple MP3 files into one audiobook
