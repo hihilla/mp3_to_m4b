@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+command -v ffmpeg >/dev/null 2>&1 || { echo "❌ ffmpeg not installed"; exit 1; }
+command -v ffprobe >/dev/null 2>&1 || { echo "❌ ffprobe not installed"; exit 1; }
+
 INPUT_DIR=${1:-.}
 OUTPUT=${2:-book.m4b}
 
