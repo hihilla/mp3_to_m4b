@@ -14,9 +14,29 @@ Made to unite the output from [.epub to Audiobook](https://github.com/p0n1/epub_
 
 ## Requirements
 
-* `ffmpeg`
-* `ffprobe`
-* `python3`
+### Python
+```bash
+pip install -r requirements.txt
+````
+
+### System dependencies
+
+Install ffmpeg (includes ffprobe):
+
+#### macOS (Homebrew)
+```bash
+brew install ffmpeg
+```
+
+#### Ubuntu
+```bash
+sudo apt install ffmpeg
+```
+
+#### Windows (choco)
+```bash
+choco install ffmpeg
+```
 
 ## Usage
 
